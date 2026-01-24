@@ -1,0 +1,13 @@
+db.sqlite3
+**/__pycache__/
+media/
+staticfiles/
+.log
+
+# OS / Editor
+.vscode/
+.idea/
+
+# Sensitive files
+.env
+.env.dev
