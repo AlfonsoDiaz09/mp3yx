@@ -1,143 +1,157 @@
+{% extends "common/base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="es">
+{% block title %}MP3yx Downloader{% endblock %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>MP3yx</title>
-  <link rel="stylesheet" href="{% static 'music/styles.css' %}">
-</head>
+{% block styles %}
+<link rel="stylesheet" href="{% static 'music/styles.css' %}">
+{% endblock %}
 
-<body>
-  <div class="container">
-    <h1>🎵 MP3yx Downloader</h1>
+{% block content %}
+<div class="container d-flex justify-content-center">
+  <div class="w-100" style="max-width: 720px;">
+
+    <h1 class="text-center mb-4">🎵 MP3yx Downloader</h1>
 
     <div id="groups"></div>
 
-    <button class="btn-primary" onclick="addGroup()">➕ Agregar carpeta</button>
+    <button class="btn btn-success btn-lg w-100 mt-3" onclick="download()">
+      {% include "common/icons/download.html" %}
+      Descargar MP3
+    </button>
 
-    <button class="btn-success" onclick="download()">⬇ Descargar MP3</button>
   </div>
+</div>
 
-  <script>
-    const groups = [];
+<button
+  class="btn btn-primary rounded-circle shadow fab-add-folder"
+  onclick="addGroup()"
+  title="Agregar carpeta"
+>
+  {% include "common/icons/folder_plus.html" %}
+</button>
+{% endblock %}
 
-    function addGroup() {
-      groups.push({ folder: "", links: [] });
-      render();
+{% block scripts %}
+<script>
+  const groups = [];
+
+  function addGroup() {
+    groups.push({ folder: "Carpeta", links: [] });
+    render();
+
+    setTimeout(() => {
+      const cards = document.querySelectorAll(".music-card");
+      cards[cards.length - 1]?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  }
+
+  function addLink(index) {
+    const input = document.getElementById(`link-${index}`);
+    const value = input.value.trim();
+
+    if (!value) {
+      alert("Link vacío");
+      return;
     }
 
-    function addLink(index) {
-      const input = document.getElementById(`link-${index}`);
-      const value = input.value.trim();
+    groups[index].links.push(value);
+    input.value = "";
+    render();
+  }
 
-      if (!value) {
-        alert("Link vacío");
-        return;
-      }
+  function removeLink(groupIndex, linkIndex) {
+    groups[groupIndex].links.splice(linkIndex, 1);
+    render();
+  }
 
-      groups[index].links.push(value);
-      input.value = "";
-      render();
+  function render() {
+    if (groups.length === 0) {
+      groups.push({ folder: "Carpeta", links: [] });
     }
 
-    function removeLink(groupIndex, linkIndex) {
-      groups[groupIndex].links.splice(linkIndex, 1);
-      render();
-    }
+    const container = document.getElementById("groups");
+    container.innerHTML = "";
 
-    function render() {
-      if (groups.length === 0) {
-        groups.push({ folder: "Carpeta", links: [] });
-      }
+    groups.forEach((group, i) => {
+      container.innerHTML += `
+        <div class="card mb-3 shadow-sm music-card">
+          <div class="card-body">
 
-      const container = document.getElementById("groups");
-      container.innerHTML = "";
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <input
+                  class="form-control"
+                  placeholder="Nombre de la carpeta"
+                  value="${group.folder}"
+                  onchange="groups[${i}].folder = this.value"
+                />
+              </div>
+            </div>
 
-      groups.forEach((group, i) => {
-        container.innerHTML += `
-        <div class="group">
-          <div class="group-header">
-            <input 
-              placeholder="Nombre de la carpeta"
-              value="${group.folder}"
-              onchange="groups[${i}].folder = this.value"
-            />
-          </div>
+            <div class="input-group mb-3">
+              <input
+                id="link-${i}"
+                class="form-control"
+                placeholder="Pega el link de YouTube"
+              />
+              <button class="btn btn-outline-secondary" onclick="addLink(${i})">
+                {% include "common/icons/circle_plus.html" %}
+                Agregar
+              </button>
+            </div>
 
-          <div class="group-header">
-            <input id="link-${i}" placeholder="Pega el link de YouTube" />
-            <button class="btn-secondary" onclick="addLink(${i})">Agregar</button>
-          </div>
-
-          <ul>
-            ${group.links
-            .map(
-              (link, j) => `
-                    <li style="display:flex; gap:8px; align-items:center;">
-                    <span style="flex:1">${link}</span>
-                    <button 
-                        onclick="removeLink(${i}, ${j})"
-                        style="
-                        background:#ef4444;
-                        color:white;
-                        border:none;
-                        border-radius:6px;
-                        padding:4px 8px;
-                        cursor:pointer;
-                        "
-                    >
-                        ❌
-                    </button>
-                    </li>
-                `
-            )
-            .join("")}
+            <ul class="list-group list-group-flush">
+              ${group.links.map((link, j) => `
+                <li class="list-group-item d-flex align-items-center gap-2">
+                  <span class="flex-fill small text-break">${link}</span>
+                  <button
+                    class="btn btn-danger"
+                    onclick="removeLink(${i}, ${j})"
+                    title="Eliminar link"
+                  >
+                    {% include "common/icons/trash.html" %}
+                  </button>
+                </li>
+              `).join("")}
             </ul>
+
+          </div>
         </div>
       `;
-      });
-    }
+    });
+  }
 
-    function download() {
-      if (groups.length === 0) {
-        alert("Agrega al menos una carpeta");
-        return;
-      }
+  function download() {
+    fetch("/music/download/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken")
+      },
+      body: JSON.stringify({ groups })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error();
+      return res.blob();
+    })
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "music.zip";
+      a.click();
+    })
+    .catch(() => alert("Error al descargar"));
+  }
 
-      fetch("/music/download/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken")
-        },
-        body: JSON.stringify({ groups })
-      })
-        .then(res => {
-          if (!res.ok) throw new Error();
-          return res.blob();
-        })
-        .then(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "music.zip";
-          a.click();
-        })
-        .catch(() => alert("Error al descargar"));
-    }
+  function getCookie(name) {
+    return document.cookie
+      .split("; ")
+      .find(row => row.startsWith(name))
+      ?.split("=")[1];
+  }
 
-    function getCookie(name) {
-      return document.cookie
-        .split("; ")
-        .find(row => row.startsWith(name))
-        ?.split("=")[1];
-    }
-
-    render();
-  </script>
-
-</body>
-
-</html>
+  render();
+</script>
+{% endblock %}
