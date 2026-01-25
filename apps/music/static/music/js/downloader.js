@@ -10,6 +10,12 @@ function addGroup() {
   }, 50);
 }
 
+function removeGroup(index) {
+  if (!confirm("¿Eliminar esta carpeta y todos sus links?")) return;
+  groups.splice(index, 1);
+  render();
+}
+
 function addLink(index) {
   const input = document.getElementById(`link-${index}`);
   const value = input.value.trim();
@@ -37,9 +43,26 @@ function render() {
   const container = document.getElementById("groups");
   container.innerHTML = "";
 
+  const showDeleteFolder = groups.length > 1;
+
   groups.forEach((group, i) => {
     container.innerHTML += `
-      <div class="card mb-3 shadow-sm music-card">
+      <div class="card mb-4 shadow-sm music-card position-relative">
+
+        ${
+          showDeleteFolder
+            ? `
+              <button
+                class="btn btn-danger rounded-circle folder-delete-btn"
+                onclick="removeGroup(${i})"
+                title="Eliminar carpeta"
+              >
+                <i class="bi bi-x-lg"></i>
+              </button>
+            `
+            : ""
+        }
+
         <div class="card-body">
 
           <div class="row mb-3">
@@ -74,7 +97,7 @@ function render() {
                   onclick="removeLink(${i}, ${j})"
                   title="Eliminar link"
                 >
-                  <i class="bi bi-x-circle"></i>
+                  <i class="bi bi-trash-fill"></i>
                 </button>
               </li>
             `).join("")}
