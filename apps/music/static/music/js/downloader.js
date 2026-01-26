@@ -49,30 +49,35 @@ function render() {
 
   groups.forEach((group, i) => {
     container.innerHTML += `
-      <div class="card mb-4 shadow-sm music-card">
+      <div class="card mb-3 shadow-sm music-card">
+        <div class="folder-header d-flex align-items-center" onclick="toggleGroup(${i})">
+          <div class="folder-toggle d-flex align-items-center justify-content-between flex-fill px-2">
+            <span class="folder-title">
+              ${group.folder || "Carpeta"}
+            </span>
 
-        <!-- HEADER -->
-        <div class="folder-header" onclick="toggleGroup(${i})">
-          <span class="folder-title">${group.folder || "Carpeta"}</span>
+            <i class="bi ${
+              group.collapsed ? "bi-chevron-down" : "bi-chevron-up"
+            }"></i>
+          </div>
 
           ${
             showDeleteFolder
               ? `
-              <button
-                class="btn btn-danger btn-sm"
-                onclick="event.stopPropagation(); removeGroup(${i})"
-              >
-                <i class="bi bi-trash-fill"></i>
-              </button>
-            `
+                <button
+                  class="btn btn-outline-danger"
+                  onclick="removeGroup(${i})"
+                  title="Eliminar carpeta"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              `
               : ""
           }
         </div>
 
-        <!-- BODY -->
         <div class="folder-body ${group.collapsed ? "d-none" : ""}">
           <div class="card-body">
-
             <input
               class="form-control mb-3"
               placeholder="Nombre de la carpeta"
