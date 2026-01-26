@@ -1,58 +1,42 @@
-body {
-  background-color: #f8f9fa;
-}
-
-/* Form folders and links */
-
 .card {
   border-radius: 16px;
+  overflow: hidden;
 }
 
-input::placeholder {
-  font-size: 0.9rem;
-}
-
-.list-group-item {
-  font-size: 0.85rem;
-}
-
-/* Flotant button */
-.fab-add-folder {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 56px;
-  height: 56px;
+/* Header clickable */
+.folder-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1050;
+  justify-content: space-between;
+
+  padding: 12px 16px;
+  background: #f1f3f5;
+  cursor: pointer;
+
+  user-select: none;
 }
 
-.fab-add-folder svg {
-  width: 22px;
-  height: 22px;
+.folder-header:hover {
+  background: #e9ecef;
 }
 
-/* Folder delete button */
-.folder-delete-btn {
-  position: absolute;
-  top: -16px;
-  right: -16px;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 3px solid #fff;
-  z-index: 20;
-
-  transition: transform 0.15s ease, opacity 0.15s ease;
+.folder-title {
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
-.folder-delete-btn i {
-  font-size: 1.25rem;
+/* Body */
+.folder-body {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
