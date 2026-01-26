@@ -15,8 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.shortcuts import redirect
+from django.urls import include, path
+
+def redirect_to_music(request):
+    return redirect("/music/")
+
 
 urlpatterns = [
+    path("", redirect_to_music),
     path('admin/', admin.site.urls),
+    path("music/", include("apps.music.urls")),
 ]
