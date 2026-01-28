@@ -1,4 +1,8 @@
 const groups = [];
+let downloadTaskId = null;
+let progressInterval = null;
+
+/* ---------------- GROUPS ---------------- */
 
 function addGroup() {
   groups.push({ folder: "Carpeta", links: [], collapsed: false });
@@ -36,6 +40,8 @@ function removeLink(groupIndex, linkIndex) {
   groups[groupIndex].links.splice(linkIndex, 1);
   render();
 }
+
+/* ---------------- RENDER ---------------- */
 
 function render() {
   if (groups.length === 0) {
@@ -120,6 +126,98 @@ function render() {
       </div>
     `;
   });
+}
+
+/* ---------------- DOWNLOAD ---------------- */
+
+function startDownload() {
+  const btn = document.getElementById("downloadBtn");
+  btn.disabled = true;
+  btn.innerHTML =
+    `<span class="spinner-border spinner-border-sm me-2"></span>Descargando...`;
+
+  document.getElementById("download-progress").classList.remove("d-none");
+
+  fetch("/music/download/start/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    body: JSON.stringify({ groups })
+  })
+    .then(res => res.json())
+    .then(data => {
+      downloadTaskId = data.task_id;
+      progressInterval = setInterval(fetchProgress, 1000);
+    })
+    .catch(resetDownloadUI);
+}
+
+function fetchProgress() {
+  fetch(`/music/download/progress/?task_id=${downloadTaskId}`)
+    .then(res => res.json())
+    .then(data => {
+      updateProgressUI(data);
+
+      if (data.status === "finished") {
+        clearInterval(progressInterval);
+        downloadFile();
+      }
+    });
+}
+
+function updateProgressUI(data) {
+  const bar = document.getElementById("globalProgress");
+  bar.style.width = `${data.overall}%`;
+  bar.innerText = `${data.overall}%`;
+
+  const list = document.getElementById("folderProgressList");
+  list.innerHTML = "";
+
+  data.folders.forEach(folder => {
+    list.innerHTML += `
+      <div class="mb-2">
+        <small class="fw-semibold">${folder.name}</small>
+        <div class="progress">
+          <div class="progress-bar bg-info" style="width:${folder.progress}%"></div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function downloadFile() {
+  fetch(`/music/download/file/?task_id=${downloadTaskId}`)
+    .then(res => res.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "music.zip";
+      a.click();
+      resetDownloadUI();
+    });
+}
+
+function resetDownloadUI() {
+  clearInterval(progressInterval);
+
+  const btn = document.getElementById("downloadBtn");
+  btn.disabled = false;
+  btn.innerHTML =
+    `<i class="bi bi-download me-2"></i>Descargar MP3`;
+
+  document.getElementById("download-progress").classList.add("d-none");
+}
+
+/* ---------------- HELPERS ---------------- */
+
+function getCookie(name) {
+  return document.cookie
+    .split("; ")
+    .find(row => row.startsWith(name))
+    ?.split("=")[1];
 }
 
 render();
