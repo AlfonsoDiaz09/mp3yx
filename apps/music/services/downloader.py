@@ -14,8 +14,18 @@ def download_mp3(url: str, base_path: str):
         }],
         "noplaylist": True,
         "quiet": True,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android"]
+            }
+        },
+        "http_headers": {
+            "User-Agent": "Mozilla/5.0"
+        },
 
-        "js_runtimes": ["node"],
+        "js_runtimes": {
+            "node": {}
+        },
         "retries": 3,
         "fragment_retries": 3,
     }

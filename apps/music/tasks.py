@@ -34,21 +34,38 @@ def download_task(task_id, groups):
             TASKS[task_id]["folders"].append(folder_progress)
 
             for link in group["links"]:
+                success = False
                 try:
                     download_mp3(link, folder_path)
+                    success = True
                 except Exception as e:
                     print("❌ Error descargando:", link, e)
-                    continue
 
-                done += 1
+                if success:
+                    done += 1
+
                 folder_progress["progress"] = int(
                     (done / total_links) * 100
                 )
                 TASKS[task_id]["overall"] = folder_progress["progress"]
 
+        if done == 0:
+            TASKS[task_id].update({
+                "status": "error",
+                "error": "No se pudo descargar ningún archivo",
+            })
+            return
+
+
         zip_path = zip_folder(music_dir)
         zip_path = zip_path.resolve()
 
+        if zip_path.stat().st_size < 1024:
+            TASKS[task_id].update({
+                "status": "error",
+                "error": "ZIP vacío o inválido",
+            })
+            return
 
         TASKS[task_id].update({
             "status": "finished",
