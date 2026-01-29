@@ -15,7 +15,9 @@ def download_mp3(url: str, base_path: str):
         "noplaylist": True,
         "quiet": True,
 
-        "js_runtimes": ["node"],
+        "js_runtimes": {
+            "node": {}
+        },
         "retries": 3,
         "fragment_retries": 3,
     }
