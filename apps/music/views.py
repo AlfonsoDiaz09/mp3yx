@@ -90,9 +90,6 @@ def download_file(request):
     if zip_path.stat().st_size < 100:
         return JsonResponse({"error": "zip invalid"}, status=500)
 
-    with open(zip_path, "rb") as f:
-        content = f.read()
-
     response = FileResponse(open(zip_path, "rb"), as_attachment=True)
     response["Content-Disposition"] = f'attachment; filename="{zip_path.name}"'
     return response
