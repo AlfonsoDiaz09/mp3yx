@@ -1,3 +1,4 @@
+import logging
 import tempfile
 import time
 import zipfile
@@ -8,6 +9,8 @@ from .services.zip_utils import zip_folder
 from pathlib import Path
 
 TASKS = {}
+
+logger = logging.getLogger("music")
 
 
 def download_task(task_id, groups):
@@ -61,6 +64,7 @@ def download_task(task_id, groups):
         zip_path = zip_path.resolve()
 
         if zip_path.stat().st_size < 1024:
+            logger.error("ZIP corrupto")
             TASKS[task_id].update({
                 "status": "error",
                 "error": "ZIP vacío o inválido",
@@ -75,3 +79,4 @@ def download_task(task_id, groups):
     except Exception as e:
         TASKS[task_id]["status"] = "error"
         TASKS[task_id]["error"] = str(e)
+        return

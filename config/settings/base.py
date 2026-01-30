@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+from datetime import datetime
 from pathlib import Path
 import environ
 
@@ -29,6 +30,11 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+
+# LOGGERS
+LOG_LEVEL = env("LOG_LEVEL")
+ZIP_MIN_SIZE = int(env("ZIP_MIN_SIZE"))
+YTDLP_QUIET = env("YTDLP_QUIET")
 
 
 # Application definition
@@ -119,3 +125,75 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = env('MEDIA_URL', default='/media/')
 MEDIA_ROOT = BASE_DIR / 'media'
+LOG_DIR = BASE_DIR / "logs"
+APP_LOG_DIR = LOG_DIR / "log_app"
+ERROR_LOG_DIR = LOG_DIR / "log_error"
+
+APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
+ERROR_LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+TODAY = datetime.now().strftime("%d_%m_%Y")
+
+
+# LOGGING
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name} | {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "app_file": {
+            "level": LOG_LEVEL,
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": APP_LOG_DIR / f"log_app_{TODAY}.log",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 30,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+
+        "error_file": {
+            "level": "ERROR",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": ERROR_LOG_DIR / f"log_error_{TODAY}.log",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 60,
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+
+    "loggers": {
+        "music": {
+            "handlers": ["app_file", "error_file", "console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+
+        "django": {
+            "handlers": ["app_file", "error_file", "console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+
+        "django.utils.autoreload": {
+            "handlers": [],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}

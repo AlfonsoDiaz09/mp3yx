@@ -164,6 +164,12 @@ function fetchProgress() {
         clearInterval(progressInterval);
         downloadFile();
       }
+      if (data.status === "error") {
+        clearInterval(progressInterval);
+        progressInterval = null;
+        resetDownloadUI();
+        return alert('Hubo un problema al descargar la música');
+      }
     });
 }
 
