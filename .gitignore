@@ -2,7 +2,7 @@ db.sqlite3
 **/__pycache__/
 media/
 staticfiles/
-.log
+logs/
 
 # OS / Editor
 .vscode/
