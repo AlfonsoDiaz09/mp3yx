@@ -34,6 +34,8 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
 # LOGGERS
 LOG_LEVEL = env("LOG_LEVEL")
 ZIP_MIN_SIZE = int(env("ZIP_MIN_SIZE"))
@@ -126,8 +128,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 MEDIA_URL = env('MEDIA_URL', default='/media/')
 MEDIA_ROOT = BASE_DIR / 'media'
+
 LOG_DIR = BASE_DIR / "logs"
 APP_LOG_DIR = LOG_DIR / "log_app"
 ERROR_LOG_DIR = LOG_DIR / "log_error"
