@@ -1,6 +1,7 @@
 import json
 import shutil
 import tempfile
+from django.conf import settings
 from django.http import FileResponse, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +15,9 @@ from .tasks import TASKS, download_task
 import threading
 
 def index(request):
-    return render(request, "music/index.html")
+    return render(request, "music/index.html", {
+        "app_version": settings.APP_VERSION
+    })
 
 @csrf_exempt
 def download_music(request):
