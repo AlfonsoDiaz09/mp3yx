@@ -3,6 +3,7 @@ db.sqlite3
 media/
 staticfiles/
 logs/
+ffmpeg/
 
 # OS / Editor
 .vscode/
